@@ -173,12 +173,13 @@ BUF is the buffer on which to act."
           (setq cursor-flash--timer nil))
         (while (setq ovl (pop cursor-flash--overlays))
           (delete-overlay ovl))
-        (when cursor-flash--eolp
-          (setq cursor-flash--eolp nil)
-          (delete-char 1))
-        (when cursor-flash--final-line-p
-          (setq cursor-flash--final-line-p nil)
-          (delete-region (1- (point-max)) (point-max)))
+        (with-silent-modifications
+          (when cursor-flash--eolp
+            (setq cursor-flash--eolp nil)
+            (delete-char 1))
+          (when cursor-flash--final-line-p
+            (setq cursor-flash--final-line-p nil)
+            (delete-region (1- (point-max)) (point-max))))
         (when cursor-flash--yascroll-bar
           (setq cursor-flash--yascroll-bar nil)
           ;; vline and yascroll modes interfere with each other in
@@ -213,15 +214,16 @@ This is intended to be a hook function for `post-command-hook'."
       (when (zerop (forward-line -1))
         (cursor-flash--make-overlay end-col)  ; optional overlay row #1, above POINT
         (forward-line))
-      (when cursor-flash--eolp
-        (end-of-line)
-        (insert-char 32)
-        (backward-char))
-      (cursor-flash--make-overlay end-col)    ; overlay row #2, at POINT's row
-      (unless (zerop (forward-line 1))
-        ;; row #2 is the final line of buffer
-        (insert "\n")
-        (setq cursor-flash--final-line-p t))
+      (with-silent-modifications
+        (when cursor-flash--eolp
+          (end-of-line)
+          (insert-char 32)
+          (backward-char))
+        (cursor-flash--make-overlay end-col)  ; overlay row #2, at POINT's row
+        (unless (zerop (forward-line 1))
+          ;; row #2 is the final line of buffer
+          (insert "\n")
+          (setq cursor-flash--final-line-p t)))
       (cursor-flash--make-overlay end-col)    ; overlay row #3, below POINT
       (goto-char return-pos)
       (redisplay)
