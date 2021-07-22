@@ -4,62 +4,82 @@
 
 ;; Author/Maintainer: Boruch Baum <boruch_baum@gmx.com>
 ;; Homepage: https://github.com/Boruch-Baum/emacs-cursor-flash
-;; License: GPL3+
+;; SPDX-License-Identifier: GPL-3.0-or-later
 ;; Keywords: convenience faces maint
 ;; Package: cursor-flash
 ;; Version: 1.0
 ;; Package-Requires: ((emacs "24.3"))
-;;
+
 ;;   (emacs "24.3") ; for: defvar-local, setq-local
 
+;; This file is NOT part of GNU Emacs.
+
+;; This is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General Public License as published by the Free
+;; Software Foundation, either version 3 of the License, or (at your
+;; option) any later version.
+
+;; This software is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
+
+;; You should have received a copy of the GNU General Public License along
+;; with this software. If not, see <https://www.gnu.org/licenses/>.
+
 ;;; Commentary:
-;;
+
 ;;   This package temporarily highlights the area immediately
 ;;   surrounding POINT when navigating amongst buffers and windows. It
 ;;   is intended to assist in visually identifying the current POINT
 ;;   and the current window when many windows are on the same frame or
 ;;   when windows are very large.
-;;
+
 ;;   This package was inspired by:
 ;;      https://unix.stackexchange.com/questions/83167/emacs-finding-the-cursor-in-multiple-windows
 
 ;;; Usage:
-;;
+
 ;;   After installing the package: M-x `cursor-flash-mode'.
-;;
+
 ;;   To automatically enable the mode when starting Emacs, add an
 ;;   equivalent of the following to your init file:
-;;
+
 ;;     (require 'cursor-flash)
 ;;     (cursor-flash-mode 1)
 
 ;;; Customization:
-;;
+
 ;;   See variable `cursor-flash-interval' and face `cursor-flash-face'.
 
 ;;; Compatibility:
-;;
+
 ;;   * Tested on Debian Emacs 27 nox.
-;;
+
 ;;   * Includes support to operate nicely with `yascroll-bar-mode' and
 ;;     `vline-mode'. It temporarily suspends those modes locally
 ;;     during a flash in order not to make the buffer display jump
 ;;     around.
 
 ;;; Feedback:
-;;
+
 ;;   * It's best to contact me by opening an 'issue' on the package's
 ;;     github repository (see above) or, distant second-best, by
 ;;     direct e-mail.
-;;
+
 ;;   * Code contributions are welcome and github starring is
 ;;     appreciated.
 
 
-;;
 ;;; Code:
 
-;;
+;;; External functions
+
+(declare-function yascroll-bar-mode         "ext:yascroll.el")
+(declare-function yascroll:show-scroll-bar  "ext:yascroll.el")
+(declare-function vline-mode                "ext:vline.el")
+
+
 ;;; Faces:
 
 (defface cursor-flash-face
@@ -75,7 +95,6 @@
   :group 'cursor-flash)
 
 
-;;
 ;;; Customization variables:
 
 (defcustom cursor-flash-interval 0.05
@@ -85,7 +104,6 @@ A floating point number."
   :group 'cursor-flash)
 
 
-;;
 ;;; Global variables:
 
 (defvar cursor-flash-mode nil
@@ -100,7 +118,6 @@ Never set this variable directly! Always use function
   "The selected buffer prior to the current command.")
 
 
-;;
 ;;; Buffer-local variables:
 
 (defvar-local cursor-flash--overlays nil
@@ -135,7 +152,6 @@ This is to work around unique display challenge when POINT is on a
 buffer's final line.")
 
 
-;;
 ;;; Internal functions:
 
 (defsubst cursor-flash--make-overlay (ovl-end-col)
@@ -186,7 +202,7 @@ BUF is the buffer on which to act."
           ;; ugly ways. We prioritize vline since it's likely the less
           ;; permanent and more immediate feature requested by the
           ;; user.
-          (when (not cursor-flash--vline)
+          (unless cursor-flash--vline
             (yascroll-bar-mode 1)
             (yascroll:show-scroll-bar)))
         (when cursor-flash--vline
@@ -233,7 +249,6 @@ This is intended to be a hook function for `post-command-hook'."
         (run-at-time cursor-flash-interval nil #'cursor-flash--delete (current-buffer))))))
 
 
-;;
 ;;; Interactive functions:
 
 (defun cursor-flash-mode (&optional arg)
@@ -263,7 +278,6 @@ positive, and turns it off otherwise."
      (message "Cursor-Flash mode disabled"))))
 
 
-;;
 ;;; Conclusion:
 
 (provide 'cursor-flash)
